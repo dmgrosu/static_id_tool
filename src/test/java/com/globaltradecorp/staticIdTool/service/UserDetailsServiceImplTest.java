@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
@@ -32,7 +32,7 @@ class UserDetailsServiceImplTest {
         when(userDaoMock.findByUsername(eq(username)))
                 .thenReturn(Optional.of(AppUser.builder()
                         .username("jdoe")
-                        .password("passwd")
+                        .passwd("passwd")
                         .firstName("John")
                         .lastName("Doe")
                         .build())
@@ -44,6 +44,7 @@ class UserDetailsServiceImplTest {
         // ASSERT
         assertEquals("jdoe", actualDetails.getUsername());
         assertEquals("passwd", actualDetails.getPassword());
+        assertIterableEquals(Collections.singletonList(new SimpleGrantedAuthority("ALL")), actualDetails.getAuthorities());
     }
 
     @Test

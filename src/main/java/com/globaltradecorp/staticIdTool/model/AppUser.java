@@ -10,7 +10,8 @@ import lombok.Data;
 @Builder
 public class AppUser {
     private String username;
-    private String password;
+    private String passwd;
     private String firstName;
     private String lastName;
+    private String email;
 }

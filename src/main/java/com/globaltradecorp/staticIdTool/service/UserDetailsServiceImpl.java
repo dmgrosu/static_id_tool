@@ -38,12 +38,12 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         }
 
         AppUser appUser = optionalAppUser.get();
-        return new User(appUser.getUsername(), appUser.getPassword(), getGrantedAuthorities());
+        return new User(appUser.getUsername(), appUser.getPasswd(), getGrantedAuthorities());
 
     }
 
     private List<GrantedAuthority> getGrantedAuthorities() {
-        return Collections.singletonList(new SimpleGrantedAuthority("ALL"));
+        return Collections.singletonList(new SimpleGrantedAuthority("User"));
     }
 
 }
