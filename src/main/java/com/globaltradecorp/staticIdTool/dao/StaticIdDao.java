@@ -3,6 +3,7 @@ package com.globaltradecorp.staticIdTool.dao;
 import com.globaltradecorp.staticIdTool.model.ComponentType;
 import com.globaltradecorp.staticIdTool.model.StaticId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -26,30 +27,34 @@ public class StaticIdDao {
         return jdbcTemplate.query(sql, new ComponentTypeRowMapper());
     }
 
-    public List<StaticId> getStaticIdList(int rowsCount, String prefix) {
+    public List<StaticId> getStaticIdList(int componentId, String prefix, int rowsCount) {
         String sql = "select c_id.id, " +
-                            "c_id.component_id as component_id, " +
-                            "c_id.id_value, " +
-                            "c_id.create_user_id as user_id, " +
-                            "c_id.created_at, " +
-                            "au.username as username, " +
-                            "au.first_name as user_first_name, " +
-                            "au.last_name as user_last_name, " +
-                            "au.email as user_email, " +
-                            "ct.name as component_name " +
-                     "from created_id as c_id " +
-                        "join app_user au on c_id.create_user_id = au.id " +
-                        "join component_type ct on c_id.component_id = ct.id " +
-                     "where c_id.id_value like ? " +
-                     "order by c_id.id_value desc " +
-                     "limit ?";
-        return jdbcTemplate.query(sql, new StaticIdRowMapper(), prefix, rowsCount);
+                "c_id.component_id as component_id, " +
+                "c_id.id_value, " +
+                "c_id.create_user_id as user_id, " +
+                "c_id.created_at, " +
+                "au.username as username, " +
+                "au.first_name as user_first_name, " +
+                "au.last_name as user_last_name, " +
+                "au.email as user_email, " +
+                "ct.name as component_name " +
+                "from created_id as c_id " +
+                "join app_user au on c_id.create_user_id = au.id " +
+                "join component_type ct on c_id.component_id = ct.id " +
+                "where ct.id = ? and c_id.id_value like ? " +
+                "order by c_id.id_value desc " +
+                "limit ?";
+        return jdbcTemplate.query(sql, new StaticIdRowMapper(), componentId, "%" + prefix, rowsCount);
     }
 
     public boolean idValueExists(String newIdValue) {
-        String sql = "select 'true' from staticid.created_id where id_value = ? and deleted_at is null";
-        Boolean result = jdbcTemplate.queryForObject(sql, Boolean.class, newIdValue);
-        return result != null && result;
+        try {
+            String sql = "select count(*) from staticid.created_id where id_value = ? and deleted_at is null";
+            Long found = jdbcTemplate.queryForObject(sql, Long.class, newIdValue);
+            return found != null && found > 0;
+        } catch (EmptyResultDataAccessException ex) {
+            return false;
+        }
     }
 
     public void saveStaticId(StaticId staticId) {

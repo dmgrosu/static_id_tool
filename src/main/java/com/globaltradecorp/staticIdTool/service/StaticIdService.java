@@ -29,8 +29,8 @@ public class StaticIdService {
         return staticIdDao.getComponentList();
     }
 
-    public List<StaticId> getStaticIdList(int rowsCount, String prefix) {
-        return staticIdDao.getStaticIdList(rowsCount, prefix);
+    public List<StaticId> getStaticIdList(int componentId, String prefix, int rowsCount) {
+        return staticIdDao.getStaticIdList(componentId, prefix, rowsCount);
     }
 
     public void addNewIdValue(String newIdValue, Integer componentId) throws IdValueExistsException {

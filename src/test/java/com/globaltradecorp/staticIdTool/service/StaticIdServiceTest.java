@@ -36,9 +36,9 @@ class StaticIdServiceTest {
     @Test
     void test_getStaticIdList_daoCalledOnce() {
         // ACT
-        staticIdService.getStaticIdList(10, "L");
+        staticIdService.getStaticIdList(1, "L", 10);
         // ASSERT
-        verify(staticIdDaoMock, times(1)).getStaticIdList(eq(10), eq("L"));
+        verify(staticIdDaoMock, times(1)).getStaticIdList(eq(1), eq("L"), eq(10));
     }
 
     @Test
