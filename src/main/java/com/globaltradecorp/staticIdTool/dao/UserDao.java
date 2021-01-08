@@ -27,7 +27,7 @@ public class UserDao {
 
     public Optional<AppUser> findByUsername(String username) {
         try {
-            String sql = "select * from staticid.user where username = ?";
+            String sql = "select * from staticid.app_user where username = ? and deleted_at is null";
             return Optional.ofNullable(jdbcTemplate.queryForObject(sql, new AppUserRowMapper(), username));
         } catch (EmptyResultDataAccessException ex) {
             return Optional.empty();
@@ -39,7 +39,7 @@ public class UserDao {
 
     public Optional<AppUser> findByEmail(String email) {
         try {
-            String sql = "select * from staticid.user where email = ?";
+            String sql = "select * from staticid.app_user where email = ? and deleted_at is null";
             return Optional.ofNullable(jdbcTemplate.queryForObject(sql, new AppUserRowMapper(), email));
         } catch (EmptyResultDataAccessException ex) {
             return Optional.empty();
@@ -51,15 +51,28 @@ public class UserDao {
 
     public int saveUser(AppUser appUser) {
         try {
-            String sql = "insert into staticid.user(username, passwd, first_name, last_name, email)" +
-                    "values (?, ?, ?, ?, ?)";
-            return jdbcTemplate.update(sql,
-                    appUser.getUsername(),
-                    appUser.getPasswd(),
-                    appUser.getFirstName(),
-                    appUser.getLastName(),
-                    appUser.getEmail()
-            );
+            if (appUser.isNew()) {
+                String sql = "insert into staticid.app_user(username, passwd, first_name, last_name, email)" +
+                        "values (?, ?, ?, ?, ?)";
+                return jdbcTemplate.update(sql,
+                        appUser.getUsername(),
+                        appUser.getPasswd(),
+                        appUser.getFirstName(),
+                        appUser.getLastName(),
+                        appUser.getEmail()
+                );
+            } else {
+                String sql = "update staticid.app_user set username=?, passwd=?, first_name=?, last_name=?, email=?" +
+                        "where id=?";
+                return jdbcTemplate.update(sql,
+                        appUser.getUsername(),
+                        appUser.getPasswd(),
+                        appUser.getFirstName(),
+                        appUser.getLastName(),
+                        appUser.getEmail(),
+                        appUser.getId()
+                );
+            }
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
             throw ex;

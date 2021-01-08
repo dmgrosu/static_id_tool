@@ -43,7 +43,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     }
 
     private List<GrantedAuthority> getGrantedAuthorities() {
-        return Collections.singletonList(new SimpleGrantedAuthority("User"));
+        return Collections.singletonList(new SimpleGrantedAuthority("user"));
     }
 
 }

@@ -13,6 +13,7 @@ public class AppUserRowMapper implements RowMapper<AppUser> {
     @Override
     public AppUser mapRow(ResultSet resultSet, int i) throws SQLException {
         return AppUser.builder()
+                .id(resultSet.getLong("id"))
                 .username(resultSet.getString("username"))
                 .email(resultSet.getString("email"))
                 .firstName(resultSet.getString("first_name"))

@@ -9,9 +9,14 @@ import lombok.Data;
 @Data
 @Builder
 public class AppUser {
+    private Long id;
     private String username;
     private String passwd;
     private String firstName;
     private String lastName;
     private String email;
+
+    public boolean isNew() {
+        return id == null;
+    }
 }

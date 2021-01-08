@@ -44,7 +44,7 @@ class UserDetailsServiceImplTest {
         // ASSERT
         assertEquals("jdoe", actualDetails.getUsername());
         assertEquals("passwd", actualDetails.getPassword());
-        assertIterableEquals(Collections.singletonList(new SimpleGrantedAuthority("ALL")), actualDetails.getAuthorities());
+        assertIterableEquals(Collections.singletonList(new SimpleGrantedAuthority("user")), actualDetails.getAuthorities());
     }
 
     @Test
