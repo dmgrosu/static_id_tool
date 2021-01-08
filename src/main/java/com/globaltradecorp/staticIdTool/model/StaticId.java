@@ -22,9 +22,12 @@ public class StaticId {
      * Static ID value
      */
     String value;
-    Integer componentId;
-    String componentName;
+    ComponentType componentType;
     AppUser createdBy;
     OffsetDateTime createdAt;
+
+    public boolean isNew() {
+        return id == null;
+    }
 
 }

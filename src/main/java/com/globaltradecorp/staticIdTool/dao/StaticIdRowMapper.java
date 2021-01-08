@@ -1,6 +1,7 @@
 package com.globaltradecorp.staticIdTool.dao;
 
 import com.globaltradecorp.staticIdTool.model.AppUser;
+import com.globaltradecorp.staticIdTool.model.ComponentType;
 import com.globaltradecorp.staticIdTool.model.StaticId;
 import org.springframework.jdbc.core.RowMapper;
 
@@ -17,7 +18,10 @@ public class StaticIdRowMapper implements RowMapper<StaticId> {
         return StaticId.builder()
                 .id(resultSet.getLong("id"))
                 .value(resultSet.getString("id_value"))
-                .componentName(resultSet.getString("component_name"))
+                .componentType(ComponentType.builder()
+                        .id(resultSet.getInt("component_id"))
+                        .name(resultSet.getString("component_name"))
+                        .build())
                 .createdBy(AppUser.builder()
                         .id(resultSet.getLong("user_id"))
                         .username(resultSet.getString("username"))

@@ -2,13 +2,13 @@ package com.globaltradecorp.staticIdTool.service;
 
 import com.globaltradecorp.staticIdTool.dao.StaticIdDao;
 import com.globaltradecorp.staticIdTool.model.AppUser;
+import com.globaltradecorp.staticIdTool.model.ComponentType;
 import com.globaltradecorp.staticIdTool.model.StaticId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Dmitri Grosu (dmitri.grosu@codefactorygroup.com), 1/8/21
@@ -25,12 +25,12 @@ public class StaticIdService {
         this.appUserService = appUserService;
     }
 
-    public Map<Integer, String> getComponentList() {
+    public List<ComponentType> getComponentList() {
         return staticIdDao.getComponentList();
     }
 
-    public List<StaticId> getStaticIdList(int rowsCount) {
-        return staticIdDao.getStaticIdList(rowsCount);
+    public List<StaticId> getStaticIdList(int rowsCount, String prefix) {
+        return staticIdDao.getStaticIdList(rowsCount, prefix);
     }
 
     public void addNewIdValue(String newIdValue, Integer componentId) throws IdValueExistsException {
@@ -43,13 +43,15 @@ public class StaticIdService {
         }
 
         AppUser currentUser = getCurrentUser();
+        ComponentType componentType = staticIdDao.getComponentTypeById(componentId);
 
         StaticId newStaticId = StaticId.builder()
                 .value(newIdValue)
                 .createdBy(currentUser)
+                .componentType(componentType)
                 .build();
 
-        staticIdDao.saveStaticId(newStaticId, componentId);
+        staticIdDao.saveStaticId(newStaticId);
     }
 
     private AppUser getCurrentUser() {
