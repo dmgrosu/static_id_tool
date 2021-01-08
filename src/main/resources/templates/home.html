@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="en"
+>
+<head>
+    <meta charset="UTF-8">
+    <title>Static ID tool - home</title>
+    <style th:replace="fragments/head"> </style>
+</head>
+<body>
+    <nav class="navbar navbar-inverse">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" th:href="@{/home}">Static ID generator</a>
+            </div>
+            <ul class="nav navbar-nav">
+
+                <li class="dropdown" sec:authorize="hasRole('ADMIN')">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">Admin menu
+                        <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a th:href="@{/user/list}">Users</a></li>
+                    </ul>
+                </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li><p class="navbar-text" sec:authentication="name">username</p></li>
+                <li><a th:href="@{/logout}"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+</body>
+</html>

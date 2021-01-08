@@ -1,27 +1,30 @@
 package com.globaltradecorp.staticIdTool.model;
 
 import lombok.Builder;
-import lombok.Data;
+import lombok.Value;
+import org.springframework.lang.Nullable;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 /**
  * @author Dmitri Grosu (dmitri.grosu@codefactorygroup.com), 1/7/21
  */
-@Data
+@Value
 @Builder
 public class StaticId {
 
     /**
-     * Database ID
+     * Database ID, null for new objects
      */
-    private long id;
+    @Nullable
+    Long id;
     /**
      * Static ID value
      */
-    private String value;
-    private String componentName;
-    private String createdBy;
-    private LocalDateTime createdAt;
+    String value;
+    Integer componentId;
+    String componentName;
+    AppUser createdBy;
+    OffsetDateTime createdAt;
 
 }

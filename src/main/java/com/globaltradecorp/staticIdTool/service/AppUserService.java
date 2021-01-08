@@ -3,6 +3,9 @@ package com.globaltradecorp.staticIdTool.service;
 import com.globaltradecorp.staticIdTool.dao.UserDao;
 import com.globaltradecorp.staticIdTool.model.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.Nullable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -31,4 +34,12 @@ public class AppUserService {
     public Optional<AppUser> getByEmail(String email) {
         return userDao.findByEmail(email);
     }
+
+    @Nullable
+    public AppUser getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = authentication.getName();
+        return userDao.findByUsername(currentUsername).orElse(null);
+    }
+
 }
