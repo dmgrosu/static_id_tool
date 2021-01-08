@@ -7,6 +7,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 /**
@@ -41,7 +42,7 @@ public class StaticIdDao {
                 "from created_id as c_id " +
                 "join app_user au on c_id.create_user_id = au.id " +
                 "join component_type ct on c_id.component_id = ct.id " +
-                "where ct.id = ? and c_id.id_value like ? " +
+                "where ct.id = ? and c_id.id_value like ? and c_id.deleted_at is null " +
                 "order by c_id.id_value desc " +
                 "limit ?";
         return jdbcTemplate.query(sql, new StaticIdRowMapper(), componentId, "%" + prefix, rowsCount);
@@ -81,4 +82,21 @@ public class StaticIdDao {
         String sql = "select * from staticid.component_type where id = ?";
         return jdbcTemplate.queryForObject(sql, new ComponentTypeRowMapper(), componentId);
     }
+
+    public int getUserIdById(int id) {
+        String sql = "select create_user_id from staticid.created_id where id=? and deleted_at is null";
+        Integer queryResult = jdbcTemplate.queryForObject(sql, Integer.class, id);
+        return queryResult == null ? 0 : queryResult;
+    }
+
+    public void deleteByIds(List<Integer> selectedIds, OffsetDateTime userDateTime) {
+        String[] ids = new String[selectedIds.size()];
+        for (int i = 0; i < selectedIds.size(); i++) {
+            Integer selectedId = selectedIds.get(i);
+            ids[i] = selectedId.toString();
+        }
+        String sql = "update staticid.created_id set deleted_at = ? where id in (" + String.join(",", ids) + ")";
+        jdbcTemplate.update(sql, userDateTime);
+    }
+
 }

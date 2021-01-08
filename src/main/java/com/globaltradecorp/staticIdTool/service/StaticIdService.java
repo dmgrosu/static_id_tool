@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 /**
@@ -52,6 +53,33 @@ public class StaticIdService {
                 .build();
 
         staticIdDao.saveStaticId(newStaticId);
+    }
+
+    public void deleteIds(List<Integer> selectedIds, OffsetDateTime userDateTime) throws IdValueAccessException {
+        if (selectedIds == null || selectedIds.isEmpty()) {
+            return;
+        }
+        if (!checkAccessToIds(selectedIds)) {
+            throw new IdValueAccessException("Current user has no access to provided IDs");
+        }
+        staticIdDao.deleteByIds(selectedIds, userDateTime);
+    }
+
+    /**
+     * Check if current logged in user has access to selected IDs
+     *
+     * @param selectedIds - list of selected IDs
+     * @return true - user has access, false - otherwise
+     */
+    private boolean checkAccessToIds(List<Integer> selectedIds) {
+        int currentUserId = getCurrentUser().getId();
+        for (Integer selectedId : selectedIds) {
+            int found = staticIdDao.getUserIdById(selectedId);
+            if (found != currentUserId) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private AppUser getCurrentUser() {

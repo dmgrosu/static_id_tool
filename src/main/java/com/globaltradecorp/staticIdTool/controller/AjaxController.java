@@ -1,7 +1,9 @@
 package com.globaltradecorp.staticIdTool.controller;
 
 import com.globaltradecorp.staticIdTool.model.StaticId;
+import com.globaltradecorp.staticIdTool.model.dto.DeleteRequestDto;
 import com.globaltradecorp.staticIdTool.model.dto.StaticIdDto;
+import com.globaltradecorp.staticIdTool.service.IdValueAccessException;
 import com.globaltradecorp.staticIdTool.service.IdValueExistsException;
 import com.globaltradecorp.staticIdTool.service.StaticIdService;
 import org.slf4j.Logger;
@@ -46,11 +48,27 @@ public class AjaxController {
             staticIdService.addNewIdValue(staticIdDto.getIdValue(), staticIdDto.getComponentId());
             return ResponseEntity.ok().build();
         } catch (IdValueExistsException ex) {
+            logger.debug(ex.getMessage(), ex);
             return ResponseEntity.badRequest().body(ex.getMessage());
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
         }
+    }
+
+    @RequestMapping("/deleteIds")
+    public ResponseEntity<String> deleteIdValues(@RequestBody DeleteRequestDto deleteRequestDto) {
+        try {
+            staticIdService.deleteIds(deleteRequestDto.getSelectedIds(), deleteRequestDto.getUserTime());
+            return ResponseEntity.ok().build();
+        } catch (IdValueAccessException ex) {
+            logger.debug(ex.getMessage(), ex);
+            return ResponseEntity.badRequest().body(ex.getMessage());
+        } catch (Exception ex) {
+            logger.error(ex.getMessage(), ex);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
+        }
+
     }
 
 }

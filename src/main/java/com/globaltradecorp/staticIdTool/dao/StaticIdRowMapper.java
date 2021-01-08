@@ -23,7 +23,7 @@ public class StaticIdRowMapper implements RowMapper<StaticId> {
                         .name(resultSet.getString("component_name"))
                         .build())
                 .createdBy(AppUser.builder()
-                        .id(resultSet.getLong("user_id"))
+                        .id(resultSet.getInt("user_id"))
                         .username(resultSet.getString("username"))
                         .firstName(resultSet.getString("user_first_name"))
                         .lastName(resultSet.getString("user_last_name"))

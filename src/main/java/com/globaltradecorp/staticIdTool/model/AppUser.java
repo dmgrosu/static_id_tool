@@ -9,7 +9,7 @@ import lombok.Value;
 @Value
 @Builder
 public class AppUser {
-    Long id;
+    Integer id;
     String username;
     String passwd;
     String firstName;

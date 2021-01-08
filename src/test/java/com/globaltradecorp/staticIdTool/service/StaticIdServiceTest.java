@@ -76,7 +76,7 @@ class StaticIdServiceTest {
         when(staticIdDaoMock.idValueExists(anyString())).thenReturn(false);
         when(appUserServiceMock.getCurrentUser())
                 .thenReturn(AppUser.builder()
-                        .id(1L)
+                        .id(1)
                         .username("user")
                         .firstName("John")
                         .lastName("Doe")
