@@ -38,7 +38,7 @@
         <div class="form-group">
             <label for="componentType" class="control-label col-sm-2">Component type:</label>
             <div class="col-sm-6">
-                <select class="form-control" id="componentType">
+                <select class="form-control" id="componentType" onchange="showExisting()">
                     <option th:value="null" hidden>Please select...</option>
                     <option th:each="item : ${componentTypes}"
                             th:value="${item.id}"
@@ -48,11 +48,11 @@
             </div>
             <label for="prefix" class="control-label col-sm-1">Prefix:</label>
             <div class="col-sm-1">
-                <input type="text" class="form-control" id="prefix"/>
+                <input type="text" class="form-control" id="prefix" onchange="showExisting()"/>
             </div>
-            <div class="col-sm-2">
-                <button class="btn btn-info" onclick="showExisting()">Show existing</button>
-            </div>
+<!--            <div class="col-sm-2">-->
+<!--                <button class="btn btn-info" onclick="showExisting()">Show existing</button>-->
+<!--            </div>-->
         </div>
     </div>
     <div class="row" style="margin-bottom: 15px">
@@ -61,7 +61,7 @@
             <tr style="background-color: #ccc">
                 <th>ID Value</th>
                 <th>Added by</th>
-                <th>Added at</th>
+                <th>When added</th>
             </tr>
             </thead>
             <tbody>
@@ -69,7 +69,7 @@
         </table>
     </div>
     <div class="row">
-        <button class="btn btn-info" onclick="showAddModal()">Add new</button>
+        <button class="btn btn-info" onclick="showAddModal()" id="buttonAddNew">Add new</button>
     </div>
 </div>
 
@@ -129,7 +129,6 @@
     function showExisting() {
         const componentId = $('#componentType').val();
         if (!componentId) {
-            alert("Please select component type!");
             return;
         }
         const params = {
@@ -192,6 +191,23 @@
             }
         });
     }
+
+    $("#newIdValue").keyup(function(event) {
+        if (event.keyCode === 13) {
+            $("#okButton").click();
+        }
+    });
+
+    $('#newIdModal').on('shown.bs.modal', function () {
+        $('#newIdValue').focus();
+    });
+
+    $(window).keydown(function(event) {
+        const modalIsOpen = $('#newIdModal').is(':visible');
+        if (!modalIsOpen && event.keyCode === 45) {
+            $("#buttonAddNew").click();
+        }
+    })
 
 </script>
 
