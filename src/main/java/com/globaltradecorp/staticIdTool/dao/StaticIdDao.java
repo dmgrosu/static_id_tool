@@ -29,9 +29,10 @@ public class StaticIdDao {
     }
 
     public List<StaticId> getStaticIdList(int componentId, String suffix, int rowsCount) {
-        String sql = "select c_id.id, " +
+        String sql = "with t as " +
+                "(select c_id.id, " +
                 "c_id.component_id as component_id, " +
-                "c_id.id_value, " +
+                "c_id.id_value as id_value, " +
                 "c_id.create_user_id as user_id, " +
                 "c_id.created_at, " +
                 "au.username as username, " +
@@ -43,8 +44,9 @@ public class StaticIdDao {
                 "join staticid.app_user au on c_id.create_user_id = au.id " +
                 "join staticid.component_type ct on c_id.component_id = ct.id " +
                 "where ct.id = ? and c_id.id_value like ? and c_id.deleted_at is null " +
-                "order by c_id.id_value desc " +
-                "limit ?";
+                "order by id_value desc " +
+                "limit ?) " +
+                "select * from t order by id_value";
         return jdbcTemplate.query(sql, new StaticIdRowMapper(), componentId, "%" + suffix, rowsCount);
     }
 
