@@ -1,5 +1,7 @@
+-- Schema
+create schema if not exists staticid;
 -- Component Type table
-create table if not exists component_type
+create table if not exists staticid.component_type
 (
     id         serial      not null
         constraint component_type_pk primary key,
@@ -7,10 +9,8 @@ create table if not exists component_type
     created_at timestamptz not null default now(),
     deleted_at timestamptz
 );
-alter table if exists component_type
-    owner to gtc_svc;
 -- Role table
-create table if not exists app_role
+create table if not exists staticid.app_role
 (
     id         serial
         constraint app_role_pk primary key,
@@ -18,10 +18,8 @@ create table if not exists app_role
     created_at timestamptz not null default now(),
     deleted_at timestamptz
 );
-alter table if exists app_role
-    owner to gtc_svc;
 -- User table
-create table if not exists app_user
+create table if not exists staticid.app_user
 (
     id         serial      not null
         constraint app_user_pk primary key,
@@ -33,10 +31,8 @@ create table if not exists app_user
     created_at timestamptz not null default now(),
     deleted_at timestamptz
 );
-alter table if exists app_user
-    owner to gtc_svc;
 -- User Role join table
-create table if not exists app_user_role
+create table if not exists staticid.app_user_role
 (
     id      serial not null
         constraint app_user_role_pk primary key,
@@ -45,10 +41,8 @@ create table if not exists app_user_role
     role_id integer
         constraint fk_app_role_id references app_role (id)
 );
-alter table if exists app_user_role
-    owner to gtc_svc;
 -- Created Static ID table
-create table if not exists created_id
+create table if not exists staticid.created_id
 (
     id             serial
         constraint created_id_pk primary key,
@@ -60,6 +54,3 @@ create table if not exists created_id
     created_at     timestamptz not null default now(),
     deleted_at     timestamptz
 );
-alter table if exists created_id
-    owner to gtc_svc;
-
