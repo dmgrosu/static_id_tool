@@ -39,9 +39,9 @@ public class StaticIdDao {
                 "au.last_name as user_last_name, " +
                 "au.email as user_email, " +
                 "ct.name as component_name " +
-                "from created_id as c_id " +
-                "join app_user au on c_id.create_user_id = au.id " +
-                "join component_type ct on c_id.component_id = ct.id " +
+                "from staticid.created_id as c_id " +
+                "join staticid.app_user au on c_id.create_user_id = au.id " +
+                "join staticid.component_type ct on c_id.component_id = ct.id " +
                 "where ct.id = ? and c_id.id_value like ? and c_id.deleted_at is null " +
                 "order by c_id.id_value desc " +
                 "limit ?";
