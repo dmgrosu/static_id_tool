@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="en"
+>
+<head>
+    <meta charset="UTF-8">
+    <title>Static ID tool - home</title>
+    <style th:replace="fragments/head"></style>
+</head>
+<body>
+
+<nav class="navbar navbar-inverse">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" th:href="@{/home}">Static ID generator</a>
+        </div>
+        <ul class="nav navbar-nav">
+
+            <li class="dropdown" sec:authorize="hasRole('ADMIN')">
+                <a class="dropdown-toggle" data-toggle="dropdown" href="#">Admin menu
+                    <span class="caret"></span>
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a th:href="@{/user/list}">Users</a></li>
+                </ul>
+            </li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+            <li><p class="navbar-text" sec:authentication="name">username</p></li>
+            <li><a th:href="@{/logout}"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container col-md-10">
+    <div class="row" style="margin-bottom: 15px">
+        <div class="form-group">
+            <label for="componentType" class="control-label col-sm-2">Component type:</label>
+            <div class="col-sm-6">
+                <select class="form-control" id="componentType" onchange="showExisting()">
+                    <option th:value="null" hidden>Please select...</option>
+                    <option th:each="item : ${componentTypes}"
+                            th:value="${item.id}"
+                            th:text="${item.name}">
+                    </option>
+                </select>
+            </div>
+            <label for="prefix" class="control-label col-sm-1">Prefix:</label>
+            <div class="col-sm-1">
+                <input type="text" class="form-control" id="prefix" onchange="showExisting()"/>
+            </div>
+        </div>
+    </div>
+    <div class="row" style="margin-bottom: 15px">
+        <table class="table table-hover table-condensed table-bordered" id="existingIdsTable">
+            <thead>
+            <tr style="background-color: #ccc">
+                <th></th>
+                <th>ID Value</th>
+                <th>Added by</th>
+                <th>When added</th>
+            </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+    <div class="row">
+        <button class="btn btn-info" onclick="showAddModal()" id="buttonAddNew">Add new</button>
+        <button type="button" class="btn btn-default" id="buttonDelete" onclick="showDeleteConfirm()">Delete selected</button>
+    </div>
+</div>
+
+<div id="newIdModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 id="modalHeader">Add new static ID value</h4>
+            </div>
+            <div class="modal-body">
+                <input type="text" class="form-control" id="newIdValue"/>
+            </div>
+            <div class="modal-footer">
+                <button type="button"
+                        class="btn btn-info btn-sm"
+                        onclick="sendAddRequest()"
+                        id="okButton"
+                >
+                    Ok
+                </button>
+                <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="deleteConfirm" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4>Delete selected rows?</h4>
+            </div>
+            <div class="modal-footer">
+                <button type="button"
+                        class="btn btn-info btn-sm"
+                        onclick="deleteSelected()"
+                        id="buttonOkDelete"
+                >
+                    Ok
+                </button>
+                <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+</body>
+
+<script type="text/javascript">
+
+    function composeTable(staticIds) {
+        const tableBody = $("#existingIdsTable > tbody");
+        if (staticIds) {
+            tableBody.empty();
+            for (const staticId of staticIds) {
+                const html = "<tr>" +
+                    "<td><input type='checkbox' id='chbox" + staticId.id +"'></td>" +
+                    "<td>" + staticId.value + "</td>" +
+                    "<td>" + getUsername(staticId.createdBy) + "</td>" +
+                    "<td>" + new Date(staticId.createdAt).toLocaleString() + "</td>" +
+                    "</tr>";
+                tableBody.append(html);
+            }
+            if (staticIds.length === 0) {
+                tableBody.append("<tr><td colspan='3'>No values found</td></tr>");
+            }
+        }
+    }
+
+    function getUsername(user) {
+        if (user.firstName) {
+            return user.firstName + " " + user.lastName;
+        } else {
+            return user.username;
+        }
+    }
+
+    function showExisting() {
+        const componentId = $('#componentType').val();
+        if (!componentId) {
+            return;
+        }
+        const params = {
+            "componentId": componentId,
+            "prefix": $('#prefix').val()
+        };
+        $.ajax({
+            type: 'GET',
+            contentType: "application/json",
+            url: '/getExisting',
+            data: params,
+            dataType: "JSON",
+            success: (response) => {
+                composeTable(response);
+            },
+            error: function () {
+                alert('Internal server error');
+            }
+        });
+    }
+
+    function showAddModal() {
+        if (!$('#componentType').val()) {
+            alert("Please select component type!");
+            return;
+        }
+        $('#newIdModal').modal('show');
+    }
+
+    function showDeleteConfirm() {
+        if (getSelectedIds().length === 0) {
+            alert("Nothing selected!");
+            return;
+        }
+        $('#deleteConfirm').modal('show');
+    }
+
+    function getSelectedIds() {
+        const selectedIds = [];
+        $('[id^=chbox]').each(function () {
+            if (this.checked) {
+                selectedIds.push(this.id.substring(5));
+            }
+        });
+        return selectedIds;
+    }
+
+    function deleteSelected() {
+        $('#buttonOkDelete').prop('disabled', true);
+        const data = {
+            selectedIds: getSelectedIds(),
+            userTime: new Date()
+        };
+        $.ajax({
+            type: 'POST',
+            contentType: "application/json",
+            url: '/deleteIds',
+            data: JSON.stringify(data),
+            dataType: "JSON",
+            success: function () {
+                $('#deleteConfirm').modal('hide');
+                $('#buttonOkDelete').prop('disabled', false);
+                showExisting();
+            },
+            error: function (resp) {
+                switch (resp.status) {
+                    case 200:
+                        $('#deleteConfirm').modal('hide');
+                        showExisting();
+                        break;
+                    case 400:
+                        alert(resp.responseText);
+                        break;
+                    default:
+                        alert('Internal server error');
+                }
+                $('#buttonOkDelete').prop('disabled', false);
+            }
+        });
+    }
+
+    function sendAddRequest() {
+        $('#okButton').prop('disabled', true);
+        const data = {
+            idValue: $('#newIdValue').val(),
+            componentId: $('#componentType').val()
+        };
+        $.ajax({
+            type: 'POST',
+            contentType: "application/json",
+            url: '/addNew',
+            data: JSON.stringify(data),
+            dataType: "JSON",
+            success: function () {
+                $('#newIdModal').modal('hide');
+                $('#okButton').prop('disabled', false);
+                showExisting();
+            },
+            error: function (resp) {
+                switch (resp.status) {
+                    case 200:
+                        $('#newIdModal').modal('hide');
+                        showExisting();
+                        break;
+                    case 400:
+                        alert(resp.responseText);
+                        break;
+                    default:
+                        alert('Internal server error');
+                }
+                $('#okButton').prop('disabled', false);
+            }
+        });
+    }
+
+    $("#newIdValue").keyup(function(event) {
+        if (event.keyCode === 13) {
+            $("#okButton").click();
+        }
+    });
+
+    $('#newIdModal').on('shown.bs.modal', function () {
+        $('#newIdValue').focus();
+    });
+
+    $(window).keydown(function(event) {
+        const modalIsOpen = $('#newIdModal').is(':visible');
+        if (!modalIsOpen && event.keyCode === 45) {
+            $("#buttonAddNew").click();
+        }
+    })
+
+</script>
+
+</html>
