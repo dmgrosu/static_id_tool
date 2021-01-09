@@ -28,7 +28,7 @@ public class StaticIdDao {
         return jdbcTemplate.query(sql, new ComponentTypeRowMapper());
     }
 
-    public List<StaticId> getStaticIdList(int componentId, String prefix, int rowsCount) {
+    public List<StaticId> getStaticIdList(int componentId, String suffix, int rowsCount) {
         String sql = "select c_id.id, " +
                 "c_id.component_id as component_id, " +
                 "c_id.id_value, " +
@@ -45,7 +45,7 @@ public class StaticIdDao {
                 "where ct.id = ? and c_id.id_value like ? and c_id.deleted_at is null " +
                 "order by c_id.id_value desc " +
                 "limit ?";
-        return jdbcTemplate.query(sql, new StaticIdRowMapper(), componentId, "%" + prefix, rowsCount);
+        return jdbcTemplate.query(sql, new StaticIdRowMapper(), componentId, "%" + suffix, rowsCount);
     }
 
     public boolean idValueExists(String newIdValue) {

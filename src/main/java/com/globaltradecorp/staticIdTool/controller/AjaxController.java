@@ -21,7 +21,7 @@ import java.util.List;
 @RestController
 public class AjaxController {
 
-    private StaticIdService staticIdService;
+    private final StaticIdService staticIdService;
     public static final Logger logger = LoggerFactory.getLogger(AjaxController.class);
 
     @Autowired
@@ -31,10 +31,10 @@ public class AjaxController {
 
     @GetMapping("/getExisting")
     public ResponseEntity<List<StaticId>> showExisting(@RequestParam("componentId") Integer componentId,
-                                                       @RequestParam(value = "prefix", required = false, defaultValue = "") String prefix,
+                                                       @RequestParam(value = "suffix", required = false, defaultValue = "") String suffix,
                                                        @RequestParam(value = "rows", required = false, defaultValue = "10") int rowsCount) {
         try {
-            List<StaticId> staticIds = staticIdService.getStaticIdList(componentId, prefix, rowsCount);
+            List<StaticId> staticIds = staticIdService.getStaticIdList(componentId, suffix, rowsCount);
             return ResponseEntity.ok(staticIds);
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
