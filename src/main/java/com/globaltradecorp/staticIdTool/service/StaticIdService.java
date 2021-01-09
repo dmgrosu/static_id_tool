@@ -30,8 +30,8 @@ public class StaticIdService {
         return staticIdDao.getComponentList();
     }
 
-    public List<StaticId> getStaticIdList(int componentId, String prefix, int rowsCount) {
-        return staticIdDao.getStaticIdList(componentId, prefix, rowsCount);
+    public List<StaticId> getStaticIdList(int componentId, String suffix, int rowsCount) {
+        return staticIdDao.getStaticIdList(componentId, suffix, rowsCount);
     }
 
     public void addNewIdValue(String newIdValue, Integer componentId) throws IdValueExistsException {
