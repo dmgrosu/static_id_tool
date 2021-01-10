@@ -11,6 +11,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.util.Optional;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -46,7 +48,7 @@ class AppUserServiceTest {
     @Test
     void getByUsername_daoCalledOnce() {
         // ACT
-        appUserService.getByUsername("someUsername");
+        Optional<AppUser> actualUser = appUserService.getByUsername("someUsername");
         // ASSERT
         verify(userDaoMock, times(1)).findByUsername(anyString());
     }

@@ -27,7 +27,9 @@ public class UserDao {
 
     public Optional<AppUser> findByUsername(String username) {
         try {
-            String sql = "select * from staticid.app_user where username = ? and deleted_at is null";
+            String sql = "select * from staticid.app_user " +
+                    "where username = ? " +
+                    "and deleted_at is null";
             return Optional.ofNullable(jdbcTemplate.queryForObject(sql, new AppUserRowMapper(), username));
         } catch (EmptyResultDataAccessException ex) {
             return Optional.empty();
@@ -62,7 +64,7 @@ public class UserDao {
                         appUser.getEmail()
                 );
             } else {
-                String sql = "update staticid.app_user set username=?, passwd=?, first_name=?, last_name=?, email=?" +
+                String sql = "update staticid.app_user set username=?, passwd=?, first_name=?, last_name=?, email=?, approved_at=?" +
                         "where id=?";
                 return jdbcTemplate.update(sql,
                         appUser.getUsername(),
@@ -70,6 +72,7 @@ public class UserDao {
                         appUser.getFirstName(),
                         appUser.getLastName(),
                         appUser.getEmail(),
+                        appUser.getApprovedAt(),
                         appUser.getId()
                 );
             }

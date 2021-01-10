@@ -46,7 +46,7 @@ public class RegisterController {
             result.rejectValue("confirmPassword", "password.error", "Password doesn't match!");
         }
 
-        if (userService.getByUsername(userDto.getUsername()).isPresent()) {
+        if (userService.usernameExists(userDto.getUsername())) {
             result.rejectValue("username", "username.error", "Username is not unique!");
         }
 
