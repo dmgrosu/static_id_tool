@@ -54,3 +54,6 @@ create table if not exists staticid.created_id
     created_at     timestamptz not null default now(),
     deleted_at     timestamptz
 );
+-- add 'when approved' column to user
+alter table if exists staticid.app_user
+    add column if not exists approved_at timestamptz;
