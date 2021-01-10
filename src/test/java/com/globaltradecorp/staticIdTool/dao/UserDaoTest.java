@@ -100,9 +100,14 @@ class UserDaoTest {
     @Test
     void test_findByUsername_checkJdbcMethodParams() {
         // ARRANGE
-        String expectedSql = "select * from staticid.app_user " +
-                "where username = ? " +
-                "and deleted_at is null";
+        String expectedSql = "select u.*, " +
+                "(select string_agg(r.name, ',') " +
+                "from staticid.app_role r " +
+                "join staticid.app_user_role aur on r.id = aur.role_id " +
+                "where aur.user_id = u.id and r.deleted_at is null) as roles " +
+                "from staticid.app_user as u " +
+                "where u.username = ? " +
+                "and u.deleted_at is null";
         // ACT
         userDao.findByUsername("someUsername");
         // ASSERT
@@ -112,12 +117,33 @@ class UserDaoTest {
     @Test
     void test_findByEmail_checkJdbcMethodParams() {
         // ARRANGE
-        String expectedSql = "select * from staticid.app_user " +
-                "where email = ? " +
-                "and deleted_at is null";
+        String expectedSql = "select u.*, " +
+                "(select string_agg(r.name, ',') " +
+                "from staticid.app_role r " +
+                "join staticid.app_user_role aur on r.id = aur.role_id " +
+                "where aur.user_id = u.id and r.deleted_at is null) as roles " +
+                "from staticid.app_user as u " +
+                "where u.email = ? " +
+                "and u.deleted_at is null";
         // ACT
         userDao.findByEmail("someEmail");
         // ASSERT
         verify(jdbcTemplateMock, times(1)).queryForObject(eq(expectedSql), isA(AppUserRowMapper.class), eq("someEmail"));
+    }
+
+    @Test
+    void test_getById_checkJdbcMethodParams() {
+        // ARRANGE
+        String expectedSql = "select u.*," +
+                "(select string_agg(r.name, ',') " +
+                "from staticid.app_role r " +
+                "join staticid.app_user_role aur on r.id = aur.role_id " +
+                "where aur.user_id = u.id and r.deleted_at is null) as roles " +
+                "from staticid.app_user u " +
+                "where u.id = ?";
+        // ACT
+        AppUser actualUser = userDao.getById(1);
+        // ASSERT
+        verify(jdbcTemplateMock, times(1)).queryForObject(eq(expectedSql), isA(AppUserRowMapper.class), eq(1));
     }
 }

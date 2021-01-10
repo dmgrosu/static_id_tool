@@ -18,7 +18,15 @@ import java.util.Optional;
 public class UserDao {
 
     private final JdbcTemplate jdbcTemplate;
-    private final static Logger logger = LoggerFactory.getLogger(RegisterController.class);
+    private final Logger logger = LoggerFactory.getLogger(RegisterController.class);
+
+    /**
+     * Sub-query, returning user roles separated by comma, ex. 'USER,ADMIN'
+     */
+    private final String USER_ROLES_QUERY = "(select string_agg(r.name, ',') " +
+            "from staticid.app_role r " +
+            "join staticid.app_user_role aur on r.id = aur.role_id " +
+            "where aur.user_id = u.id and r.deleted_at is null) as roles ";
 
     @Autowired
     public UserDao(JdbcTemplate jdbcTemplate) {
@@ -27,9 +35,10 @@ public class UserDao {
 
     public Optional<AppUser> findByUsername(String username) {
         try {
-            String sql = "select * from staticid.app_user " +
-                    "where username = ? " +
-                    "and deleted_at is null";
+            String sql = "select u.*, " + USER_ROLES_QUERY +
+                    "from staticid.app_user as u " +
+                    "where u.username = ? " +
+                    "and u.deleted_at is null";
             return Optional.ofNullable(jdbcTemplate.queryForObject(sql, new AppUserRowMapper(), username));
         } catch (EmptyResultDataAccessException ex) {
             return Optional.empty();
@@ -41,7 +50,9 @@ public class UserDao {
 
     public Optional<AppUser> findByEmail(String email) {
         try {
-            String sql = "select * from staticid.app_user where email = ? and deleted_at is null";
+            String sql = "select u.*, " + USER_ROLES_QUERY +
+                    "from staticid.app_user as u " +
+                    "where u.email = ? and u.deleted_at is null";
             return Optional.ofNullable(jdbcTemplate.queryForObject(sql, new AppUserRowMapper(), email));
         } catch (EmptyResultDataAccessException ex) {
             return Optional.empty();
@@ -51,6 +62,12 @@ public class UserDao {
         }
     }
 
+    /**
+     * Saves provided user (new or existing) in database
+     *
+     * @param appUser - user object
+     * @return number of rows affected in database
+     */
     public int saveUser(AppUser appUser) {
         try {
             if (appUser.isNew()) {
@@ -98,6 +115,18 @@ public class UserDao {
             String sql = "select exists(select 1 from staticid.app_user where email=? and deleted_at is null)";
             Boolean queryResult = jdbcTemplate.queryForObject(sql, Boolean.class, username);
             return queryResult != null && queryResult;
+        } catch (Exception ex) {
+            logger.error(ex.getMessage(), ex);
+            throw ex;
+        }
+    }
+
+    public AppUser getById(int userId) {
+        try {
+            String sql = "select u.*," + USER_ROLES_QUERY +
+                    "from staticid.app_user u " +
+                    "where u.id = ?";
+            return jdbcTemplate.queryForObject(sql, new AppUserRowMapper(), userId);
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
             throw ex;

@@ -17,7 +17,7 @@ import java.util.List;
 @RequestMapping("/home")
 public class HomeController {
 
-    private StaticIdService staticIdService;
+    private final StaticIdService staticIdService;
 
     @Autowired
     public HomeController(StaticIdService staticIdService) {
