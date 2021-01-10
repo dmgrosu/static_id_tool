@@ -64,7 +64,7 @@ public class UserDao {
                         appUser.getEmail()
                 );
             } else {
-                String sql = "update staticid.app_user set username=?, passwd=?, first_name=?, last_name=?, email=?, approved_at=?" +
+                String sql = "update staticid.app_user set username=?, passwd=?, first_name=?, last_name=?, email=?, approved_at=? " +
                         "where id=?";
                 return jdbcTemplate.update(sql,
                         appUser.getUsername(),
@@ -81,4 +81,27 @@ public class UserDao {
             throw ex;
         }
     }
+
+    public boolean usernameExists(String username) {
+        try {
+            String sql = "select exists(select 1 from staticid.app_user where username=? and deleted_at is null)";
+            Boolean queryResult = jdbcTemplate.queryForObject(sql, Boolean.class, username);
+            return queryResult != null && queryResult;
+        } catch (Exception ex) {
+            logger.error(ex.getMessage(), ex);
+            throw ex;
+        }
+    }
+
+    public boolean userEmailExists(String username) {
+        try {
+            String sql = "select exists(select 1 from staticid.app_user where email=? and deleted_at is null)";
+            Boolean queryResult = jdbcTemplate.queryForObject(sql, Boolean.class, username);
+            return queryResult != null && queryResult;
+        } catch (Exception ex) {
+            logger.error(ex.getMessage(), ex);
+            throw ex;
+        }
+    }
+
 }

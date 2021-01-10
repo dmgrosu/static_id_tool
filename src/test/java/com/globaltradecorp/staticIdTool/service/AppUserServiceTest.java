@@ -56,7 +56,7 @@ class AppUserServiceTest {
     @Test
     void getByEmail_daoCalledOnce() {
         // ACT
-        appUserService.getByEmail("someEmail");
+        Optional<AppUser> actualUser = appUserService.getByEmail("someEmail");
         // ASSERT
         verify(userDaoMock, times(1)).findByEmail(anyString());
     }
@@ -67,5 +67,21 @@ class AppUserServiceTest {
         appUserService.getCurrentUser();
         // ASSERT
         verify(userDaoMock, times(1)).findByUsername(anyString());
+    }
+
+    @Test
+    void test_usernameExists_daoCalledOnce() {
+        // ACT
+        appUserService.usernameExists("someUser");
+        // ASSERT
+        verify(userDaoMock, times(1)).usernameExists(eq("someUser"));
+    }
+
+    @Test
+    void test_userEmailExists_daoCalledOnce() {
+        // ACT
+        appUserService.userEmailExists("someEmail");
+        // ASSERT
+        verify(userDaoMock, times(1)).userEmailExists(eq("someEmail"));
     }
 }

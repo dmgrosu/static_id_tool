@@ -28,7 +28,11 @@ public class AppUserService {
     }
 
     public boolean usernameExists(String username) {
-        return userDao.findByUsername(username).isPresent();
+        return userDao.usernameExists(username);
+    }
+
+    public boolean userEmailExists(String email) {
+        return userDao.userEmailExists(email);
     }
 
     public Optional<AppUser> getByUsername(String username) {

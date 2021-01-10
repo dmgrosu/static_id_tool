@@ -24,4 +24,8 @@ public class AppUser {
     public boolean isNew() {
         return id == null;
     }
+
+    public boolean isApproved() {
+        return approvedAt != null;
+    }
 }
