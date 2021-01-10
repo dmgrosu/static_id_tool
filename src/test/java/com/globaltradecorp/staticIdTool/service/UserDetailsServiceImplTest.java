@@ -10,6 +10,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
+import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.Optional;
 
@@ -35,6 +36,7 @@ class UserDetailsServiceImplTest {
                         .passwd("passwd")
                         .firstName("John")
                         .lastName("Doe")
+                        .approvedAt(OffsetDateTime.now())
                         .build())
                 );
 
@@ -45,6 +47,23 @@ class UserDetailsServiceImplTest {
         assertEquals("jdoe", actualDetails.getUsername());
         assertEquals("passwd", actualDetails.getPassword());
         assertIterableEquals(Collections.singletonList(new SimpleGrantedAuthority("user")), actualDetails.getAuthorities());
+    }
+
+    @Test
+    void test_loadUserByUsername_foundNotApproved_exceptionThrown() {
+        // ARRANGE
+        String username = "jdoe";
+        when(userDaoMock.findByUsername(eq(username)))
+                .thenReturn(Optional.of(AppUser.builder()
+                        .username("jdoe")
+                        .passwd("passwd")
+                        .firstName("John")
+                        .lastName("Doe")
+                        .build())
+                );
+
+        // ACT & ASSERT
+        assertThrows(UserNotApprovedException.class, () -> userDetailsService.loadUserByUsername("jdoe"));
     }
 
     @Test
