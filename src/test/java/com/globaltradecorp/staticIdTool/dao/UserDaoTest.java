@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import java.time.OffsetDateTime;
 
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -94,5 +95,29 @@ class UserDaoTest {
                         eq(now),
                         eq(1)
                 );
+    }
+
+    @Test
+    void test_findByUsername_checkJdbcMethodParams() {
+        // ARRANGE
+        String expectedSql = "select * from staticid.app_user " +
+                "where username = ? " +
+                "and deleted_at is null";
+        // ACT
+        userDao.findByUsername("someUsername");
+        // ASSERT
+        verify(jdbcTemplateMock, times(1)).queryForObject(eq(expectedSql), isA(AppUserRowMapper.class), eq("someUsername"));
+    }
+
+    @Test
+    void test_findByEmail_checkJdbcMethodParams() {
+        // ARRANGE
+        String expectedSql = "select * from staticid.app_user " +
+                "where email = ? " +
+                "and deleted_at is null";
+        // ACT
+        userDao.findByEmail("someEmail");
+        // ASSERT
+        verify(jdbcTemplateMock, times(1)).queryForObject(eq(expectedSql), isA(AppUserRowMapper.class), eq("someEmail"));
     }
 }
