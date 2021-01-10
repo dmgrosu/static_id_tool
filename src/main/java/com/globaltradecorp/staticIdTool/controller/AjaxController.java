@@ -56,7 +56,7 @@ public class AjaxController {
         }
     }
 
-    @RequestMapping("/deleteIds")
+    @PostMapping("/deleteIds")
     public ResponseEntity<String> deleteIdValues(@RequestBody DeleteRequestDto deleteRequestDto) {
         try {
             staticIdService.deleteIds(deleteRequestDto.getSelectedIds(), deleteRequestDto.getUserTime());
