@@ -27,6 +27,10 @@ public class AppUserService {
         userDao.saveUser(appUser);
     }
 
+    public boolean usernameExists(String username) {
+        return userDao.findByUsername(username).isPresent();
+    }
+
     public Optional<AppUser> getByUsername(String username) {
         return userDao.findByUsername(username);
     }

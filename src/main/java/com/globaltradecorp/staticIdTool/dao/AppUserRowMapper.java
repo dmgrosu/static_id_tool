@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.OffsetDateTime;
 
 /**
  * @author Dmitri Grosu (dmitri.grosu@codefactorygroup.com), 1/7/21
@@ -19,6 +20,7 @@ public class AppUserRowMapper implements RowMapper<AppUser> {
                 .firstName(resultSet.getString("first_name"))
                 .lastName(resultSet.getString("last_name"))
                 .passwd(resultSet.getString("passwd"))
+                .approvedAt(resultSet.getObject("approved_at", OffsetDateTime.class))
                 .build();
     }
 }

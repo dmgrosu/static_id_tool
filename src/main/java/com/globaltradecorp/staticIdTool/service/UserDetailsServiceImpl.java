@@ -2,6 +2,9 @@ package com.globaltradecorp.staticIdTool.service;
 
 import com.globaltradecorp.staticIdTool.dao.UserDao;
 import com.globaltradecorp.staticIdTool.model.AppUser;
+import lombok.SneakyThrows;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -23,6 +26,7 @@ import java.util.Optional;
 public class UserDetailsServiceImpl implements UserDetailsService {
 
     private final UserDao userDao;
+    private final Logger logger = LoggerFactory.getLogger(UserDetailsServiceImpl.class);
 
     @Autowired
     public UserDetailsServiceImpl(UserDao userDao) {
@@ -30,11 +34,20 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     }
 
     @Override
+    @SneakyThrows
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
         Optional<AppUser> optionalAppUser = userDao.findByUsername(username);
+        AppUser currentUser;
         if (!optionalAppUser.isPresent()) {
-            throw new UsernameNotFoundException("User not found");
+            logger.warn(String.format("Unauthorized access attempt: username [%s] not found", username));
+            throw new UsernameNotFoundException(String.format("User not found: [%s]", username));
+        } else {
+            currentUser = optionalAppUser.get();
+        }
+        if (currentUser.getApprovedAt() == null) {
+            logger.warn(String.format("Unauthorized access attempt: user [%s] is not approved", username));
+            throw new UserNotApprovedException(String.format("User not approved: [%s]", username));
         }
 
         AppUser appUser = optionalAppUser.get();
