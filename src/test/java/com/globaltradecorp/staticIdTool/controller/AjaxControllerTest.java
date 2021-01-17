@@ -1,6 +1,8 @@
 package com.globaltradecorp.staticIdTool.controller;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.globaltradecorp.staticIdTool.model.AppUser;
 import com.globaltradecorp.staticIdTool.model.ComponentType;
@@ -24,7 +26,6 @@ import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
@@ -52,7 +53,9 @@ class AjaxControllerTest {
                 .apply(springSecurity())
                 .build();
         objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.registerModule(new JavaTimeModule())
+                .disable(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE)
+                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     }
 
     @Test
@@ -132,6 +135,6 @@ class AjaxControllerTest {
                 .andExpect(status().isOk());
         // ASSERT
         // TODO: verify OffsetDateTime serialisation
-        verify(staticIdServiceMock, times(1)).deleteIds(eq(Arrays.asList(1, 2, 3)), any());
+        verify(staticIdServiceMock, times(1)).deleteIds(eq(Arrays.asList(1, 2, 3)), eq(now));
     }
 }
