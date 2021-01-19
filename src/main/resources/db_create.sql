@@ -57,3 +57,10 @@ create table if not exists staticid.created_id
 -- add 'when approved' column to user
 alter table if exists staticid.app_user
     add column if not exists approved_at timestamptz;
+-- insert predefined user roles
+insert into staticid.app_role (name)
+select 'ADMIN'
+where not exists(select 1 from staticid.app_role where lower(name) = 'admin');
+insert into staticid.app_role (name)
+select 'USER'
+where not exists(select 1 from staticid.app_role where lower(name) = 'user');

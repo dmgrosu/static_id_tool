@@ -2,7 +2,7 @@ package com.globaltradecorp.staticIdTool.controller;
 
 import com.globaltradecorp.staticIdTool.model.ComponentType;
 import com.globaltradecorp.staticIdTool.service.StaticIdService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,14 +15,10 @@ import java.util.List;
  */
 @Controller
 @RequestMapping("/home")
+@AllArgsConstructor
 public class HomeController {
 
-    private StaticIdService staticIdService;
-
-    @Autowired
-    public HomeController(StaticIdService staticIdService) {
-        this.staticIdService = staticIdService;
-    }
+    private final StaticIdService staticIdService;
 
     @GetMapping
     public String getHomePage(Model model) {
