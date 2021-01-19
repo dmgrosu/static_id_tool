@@ -134,12 +134,12 @@ class UserDaoTest {
     @Test
     void test_getById_checkJdbcMethodParams() {
         // ARRANGE
-        String expectedSql = "select u.*," +
+        String expectedSql = "select u.*, " +
                 "(select string_agg(r.name, ',') " +
                 "from staticid.app_role r " +
                 "join staticid.app_user_role aur on r.id = aur.role_id " +
                 "where aur.user_id = u.id and r.deleted_at is null) as roles " +
-                "from staticid.app_user u " +
+                "from staticid.app_user as u " +
                 "where u.id = ?";
         // ACT
         AppUser actualUser = userDao.getById(1);

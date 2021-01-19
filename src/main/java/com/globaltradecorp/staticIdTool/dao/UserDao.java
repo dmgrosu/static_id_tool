@@ -123,8 +123,7 @@ public class UserDao {
 
     public AppUser getById(int userId) {
         try {
-            String sql = "select u.*," + USER_WITH_ROLES_QUERY +
-                    "from staticid.app_user u " +
+            String sql = USER_WITH_ROLES_QUERY +
                     "where u.id = ?";
             return jdbcTemplate.queryForObject(sql, new AppUserRowMapper(), userId);
         } catch (Exception ex) {
