@@ -135,7 +135,8 @@ public class UserDao {
     public List<AppUser> getAll() {
         try {
             String sql = USER_WITH_ROLES_QUERY +
-                    "where u.deleted_at is null";
+                    "where u.deleted_at is null " +
+                    "order by u.username";
             return jdbcTemplate.query(sql, new AppUserRowMapper());
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
