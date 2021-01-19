@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="en"
+>
+<head>
+    <meta charset="UTF-8">
+    <title>Static ID tool - home</title>
+    <style th:replace="fragments/head"></style>
+</head>
+<body>
+
+<nav class="navbar navbar-inverse">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" th:href="@{/home}">Home</a>
+        </div>
+        <ul class="nav navbar-nav navbar-right">
+            <li><p class="navbar-text" sec:authentication="name">username</p></li>
+            <li><a th:href="@{/logout}"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="row" style="margin-bottom: 15px">
+        <table class="table table-hover table-condensed table-bordered" id="existingIdsTable">
+            <thead>
+            <tr style="background-color: #ccc">
+                <th>Username</th>
+                <th>First name</th>
+                <th>Last name</th>
+                <th>E-mail</th>
+                <th>Roles</th>
+                <th>Approved at</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="item: ${usersList}">
+                <td th:text="${item.username}"> username</td>
+                <td th:text="${item.firstName}"> first name</td>
+                <td th:text="${item.lastName}"> last name</td>
+                <td th:text="${item.email}"> e-mail</td>
+                <td th:text="${item.getRolesString()}"> roles</td>
+                <td th:text="${item.getApprovedFormatted()}"> when approved</td>
+                <td>
+                    <span class="dropdown">
+                        <a href="#"
+                           class="dropdown-toggle btn btn-default"
+                           data-toggle="dropdown" th:text="..."></a>
+                        <ul class="dropdown-menu">
+                            <li th:if="${item.approvedAt == null}"><a href="#" th:onclick="showConfirm([[${item.id}]], [[${item.username}]], 'approve')">approve</a></li>
+                            <li th:if="${item.approvedAt != null}"><a href="#" th:onclick="showConfirm([[${item.id}]], [[${item.username}]], 'block')">block</a></li>
+                            <li><a href="#" th:onclick="showConfirm([[${item.id}]], [[${item.username}]], 'delete')">delete</a></li>
+                        </ul>
+                    </span>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div id="confirmModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <h4 id="confirmText"></h4>
+                <input hidden="hidden" id="confirmItemId">
+                <input hidden="hidden" id="confirmAction">
+            </div>
+            <div class="modal-footer">
+                <button type="button"
+                        class="btn btn-info btn-sm"
+                        onclick="confirmedAction()"
+                        id="okButton"
+                >
+                    Ok
+                </button>
+                <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+
+<script type="text/javascript">
+
+    function showConfirm(itemId, username, action) {
+        $('#confirmModal').modal('show');
+        $('#confirmItemId').val(itemId);
+        $('#confirmAction').val(action);
+        $('#confirmText').html(action.toUpperCase().concat(' user ', username, '?'));
+    }
+
+    function confirmedAction() {
+        const itemId = $('#confirmItemId').val();
+        const action = $('#confirmAction').val();
+        sendRequest(itemId, action);
+    }
+
+    function hideConfirm() {
+        $('#confirmModal').modal('hide');
+        $('#buttonOk').prop('disabled', false);
+        $('#confirmItemId').val('');
+        $('#confirmAction').val('');
+        $('#confirmText').val('');
+        location.reload();
+    }
+
+    function sendRequest(itemId, action) {
+        $('#buttonOk').prop('disabled', true);
+        const data = {
+            userId: itemId,
+            userTime: new Date(),
+            action: action.toUpperCase()
+        };
+        $.ajax({
+            type: 'POST',
+            contentType: "application/json",
+            url: 'admin/action',
+            data: JSON.stringify(data),
+            dataType: "JSON",
+            success: function () {
+                hideConfirm();
+            },
+            error: function (resp) {
+                switch (resp.status) {
+                    case 200:
+                        hideConfirm()
+                        break;
+                    case 400:
+                        alert(resp.responseText);
+                        break;
+                    default:
+                        alert('Internal server error');
+                }
+                $('#buttonOk').prop('disabled', false);
+            }
+        });
+    }
+
+</script>
+
+</html>

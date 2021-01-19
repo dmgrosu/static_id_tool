@@ -50,7 +50,7 @@ public class RegisterController {
             result.rejectValue("username", "username.error", "Username is not unique!");
         }
 
-        if (userService.getByEmail(userDto.getEmail()).isPresent()) {
+        if (userService.userEmailExists(userDto.getEmail())) {
             result.rejectValue("email", "email.error", "E-mail is not unique!");
         }
 

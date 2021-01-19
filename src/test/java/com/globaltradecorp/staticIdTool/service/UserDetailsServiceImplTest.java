@@ -37,6 +37,7 @@ class UserDetailsServiceImplTest {
                         .firstName("John")
                         .lastName("Doe")
                         .approvedAt(OffsetDateTime.now())
+                        .roles(Collections.singletonList("USER"))
                         .build())
                 );
 
@@ -46,7 +47,7 @@ class UserDetailsServiceImplTest {
         // ASSERT
         assertEquals("jdoe", actualDetails.getUsername());
         assertEquals("passwd", actualDetails.getPassword());
-        assertIterableEquals(Collections.singletonList(new SimpleGrantedAuthority("user")), actualDetails.getAuthorities());
+        assertIterableEquals(Collections.singletonList(new SimpleGrantedAuthority("USER")), actualDetails.getAuthorities());
     }
 
     @Test
