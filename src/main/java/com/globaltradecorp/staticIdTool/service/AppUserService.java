@@ -2,26 +2,23 @@ package com.globaltradecorp.staticIdTool.service;
 
 import com.globaltradecorp.staticIdTool.dao.UserDao;
 import com.globaltradecorp.staticIdTool.model.AppUser;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.lang.Nullable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
  * @author Dmitri Grosu (dmitri.grosu@codefactorygroup.com), 1/7/21
  */
 @Service
+@AllArgsConstructor
 public class AppUserService {
 
     private final UserDao userDao;
-
-    @Autowired
-    public AppUserService(UserDao userDao) {
-        this.userDao = userDao;
-    }
 
     public void registerNewUser(AppUser appUser) {
         userDao.saveUser(appUser);
@@ -50,4 +47,7 @@ public class AppUserService {
         return userDao.findByUsername(currentUsername).orElse(null);
     }
 
+    public List<AppUser> getAllUsers() {
+        return userDao.getAll();
+    }
 }

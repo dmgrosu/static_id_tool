@@ -9,6 +9,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -23,10 +24,12 @@ public class UserDao {
     /**
      * Sub-query, returning user roles separated by comma, ex. 'USER,ADMIN'
      */
-    private final String USER_ROLES_QUERY = "(select string_agg(r.name, ',') " +
+    private final String USER_WITH_ROLES_QUERY = "select u.*, " +
+            "(select string_agg(r.name, ',') " +
             "from staticid.app_role r " +
             "join staticid.app_user_role aur on r.id = aur.role_id " +
-            "where aur.user_id = u.id and r.deleted_at is null) as roles ";
+            "where aur.user_id = u.id and r.deleted_at is null) as roles " +
+            "from staticid.app_user as u ";
 
     @Autowired
     public UserDao(JdbcTemplate jdbcTemplate) {
@@ -35,8 +38,7 @@ public class UserDao {
 
     public Optional<AppUser> findByUsername(String username) {
         try {
-            String sql = "select u.*, " + USER_ROLES_QUERY +
-                    "from staticid.app_user as u " +
+            String sql = USER_WITH_ROLES_QUERY +
                     "where u.username = ? " +
                     "and u.deleted_at is null";
             return Optional.ofNullable(jdbcTemplate.queryForObject(sql, new AppUserRowMapper(), username));
@@ -50,8 +52,7 @@ public class UserDao {
 
     public Optional<AppUser> findByEmail(String email) {
         try {
-            String sql = "select u.*, " + USER_ROLES_QUERY +
-                    "from staticid.app_user as u " +
+            String sql = USER_WITH_ROLES_QUERY +
                     "where u.email = ? and u.deleted_at is null";
             return Optional.ofNullable(jdbcTemplate.queryForObject(sql, new AppUserRowMapper(), email));
         } catch (EmptyResultDataAccessException ex) {
@@ -123,7 +124,7 @@ public class UserDao {
 
     public AppUser getById(int userId) {
         try {
-            String sql = "select u.*," + USER_ROLES_QUERY +
+            String sql = "select u.*," + USER_WITH_ROLES_QUERY +
                     "from staticid.app_user u " +
                     "where u.id = ?";
             return jdbcTemplate.queryForObject(sql, new AppUserRowMapper(), userId);
@@ -133,4 +134,14 @@ public class UserDao {
         }
     }
 
+    public List<AppUser> getAll() {
+        try {
+            String sql = USER_WITH_ROLES_QUERY +
+                    "where u.deleted_at is null";
+            return jdbcTemplate.query(sql, new AppUserRowMapper());
+        } catch (Exception ex) {
+            logger.error(ex.getMessage(), ex);
+            throw ex;
+        }
+    }
 }

@@ -13,19 +13,8 @@
 <nav class="navbar navbar-inverse">
     <div class="container-fluid">
         <div class="navbar-header">
-            <a class="navbar-brand" th:href="@{/home}">Static ID generator</a>
+            <a class="navbar-brand" th:href="@{/home}">Home</a>
         </div>
-        <ul class="nav navbar-nav">
-
-            <li class="dropdown" sec:authorize="hasAuthority('ADMIN')">
-                <a class="dropdown-toggle" data-toggle="dropdown" href="#">Admin menu
-                    <span class="caret"></span>
-                </a>
-                <ul class="dropdown-menu">
-                    <li><a th:href="@{/admin/users}">Users</a></li>
-                </ul>
-            </li>
-        </ul>
         <ul class="nav navbar-nav navbar-right">
             <li><p class="navbar-text" sec:authentication="name">username</p></li>
             <li><a th:href="@{/logout}"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
@@ -34,53 +23,43 @@
 </nav>
 
 <div class="container">
-    <div class="form-inline" style="margin-bottom: 15px">
-        <div class="form-group">
-            <label for="componentType" class="control-label" style="margin-right: 10px">Component type</label>
-            <select class="form-control" id="componentType" onchange="showExisting()">
-                <option th:value="null" hidden>Please select...</option>
-                <option th:each="item : ${componentTypes}"
-                        th:value="${item.id}"
-                        th:text="${item.name}">
-                </option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="suffix" class="control-label sr-only">Suffix</label>
-            <input type="text"
-                   class="form-control"
-                   id="suffix"
-                   onchange="showExisting()"
-                   placeholder="Suffix"
-            />
-        </div>
-        <div class="form-group">
-            <label for="rowsTotal" class="control-label sr-only">Suffix</label>
-            <input type="text"
-                   class="form-control"
-                   id="rowsTotal"
-                   onchange="showExisting()"
-                   placeholder="Rows, default 10"
-            />
-        </div>
-    </div>
     <div class="row" style="margin-bottom: 15px">
         <table class="table table-hover table-condensed table-bordered" id="existingIdsTable">
             <thead>
             <tr style="background-color: #ccc">
+                <th>Username</th>
+                <th>First name</th>
+                <th>Last name</th>
+                <th>E-mail</th>
+                <th>Roles</th>
+                <th>Approved at</th>
                 <th></th>
-                <th>ID Value</th>
-                <th>Added by</th>
-                <th>When added</th>
             </tr>
             </thead>
             <tbody>
+            <tr th:each="item: ${usersList}">
+                <td th:text="${item.username}"> username</td>
+                <td th:text="${item.firstName}"> first name</td>
+                <td th:text="${item.lastName}"> last name</td>
+                <td th:text="${item.email}"> e-mail</td>
+                <td th:text="${item.getRolesString()}"> roles</td>
+                <td th:text="${item.getApprovedFormatted()}"> when approved</td>
+                <td>
+                    <span class="dropdown">
+                        <a href="#"
+                           class="dropdown-toggle btn btn-default"
+                           data-toggle="dropdown" th:text="..."></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#">add role</a></li>
+                            <li><a href="#">approve</a></li>
+                            <li><a href="#">block</a></li>
+                            <li><a href="#">delete</a></li>
+                        </ul>
+                    </span>
+                </td>
+            </tr>
             </tbody>
         </table>
-    </div>
-    <div class="row">
-        <button class="btn btn-info" onclick="showAddModal()" id="buttonAddNew">Add new</button>
-        <button type="button" class="btn btn-default" id="buttonDelete" onclick="showDeleteConfirm()">Delete selected</button>
     </div>
 </div>
 
