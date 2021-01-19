@@ -8,6 +8,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -49,5 +50,17 @@ public class AppUserService {
 
     public List<AppUser> getAllUsers() {
         return userDao.getAll();
+    }
+
+    public void approveUser(Integer userId, OffsetDateTime userTime) {
+        userDao.approveUser(userId, userTime);
+    }
+
+    public void deleteUser(Integer userId, OffsetDateTime userTime) {
+        userDao.deleteUser(userId, userTime);
+    }
+
+    public void blockUser(Integer userId) {
+        userDao.approveUser(userId, null);
     }
 }

@@ -1,14 +1,13 @@
 package com.globaltradecorp.staticIdTool.dao;
 
-import com.globaltradecorp.staticIdTool.controller.RegisterController;
 import com.globaltradecorp.staticIdTool.model.AppUser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,10 +15,10 @@ import java.util.Optional;
  * @author Dmitri Grosu (dmitri.grosu@codefactorygroup.com), 1/7/21
  */
 @Component
+@Slf4j
 public class UserDao {
 
     private final JdbcTemplate jdbcTemplate;
-    private final Logger logger = LoggerFactory.getLogger(RegisterController.class);
 
     /**
      * Sub-query, returning user roles separated by comma, ex. 'USER,ADMIN'
@@ -45,7 +44,7 @@ public class UserDao {
         } catch (EmptyResultDataAccessException ex) {
             return Optional.empty();
         } catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
             throw ex;
         }
     }
@@ -58,7 +57,7 @@ public class UserDao {
         } catch (EmptyResultDataAccessException ex) {
             return Optional.empty();
         } catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
             throw ex;
         }
     }
@@ -95,7 +94,7 @@ public class UserDao {
                 );
             }
         } catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
             throw ex;
         }
     }
@@ -106,7 +105,7 @@ public class UserDao {
             Boolean queryResult = jdbcTemplate.queryForObject(sql, Boolean.class, username);
             return queryResult != null && queryResult;
         } catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
             throw ex;
         }
     }
@@ -117,7 +116,7 @@ public class UserDao {
             Boolean queryResult = jdbcTemplate.queryForObject(sql, Boolean.class, username);
             return queryResult != null && queryResult;
         } catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
             throw ex;
         }
     }
@@ -129,7 +128,7 @@ public class UserDao {
                     "where u.id = ?";
             return jdbcTemplate.queryForObject(sql, new AppUserRowMapper(), userId);
         } catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
             throw ex;
         }
     }
@@ -140,7 +139,27 @@ public class UserDao {
                     "where u.deleted_at is null";
             return jdbcTemplate.query(sql, new AppUserRowMapper());
         } catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
+            throw ex;
+        }
+    }
+
+    public void approveUser(Integer userId, OffsetDateTime userTime) {
+        try {
+            String sql = "update staticid.app_user set approved_at=? where id=?";
+            jdbcTemplate.update(sql, userTime, userId);
+        } catch (Exception ex) {
+            log.error(ex.getMessage());
+            throw ex;
+        }
+    }
+
+    public void deleteUser(Integer userId, OffsetDateTime userTime) {
+        try {
+            String sql = "update staticid.app_user set deleted_at=? where id=?";
+            jdbcTemplate.update(sql, userTime, userId);
+        } catch (Exception ex) {
+            log.error(ex.getMessage());
             throw ex;
         }
     }
