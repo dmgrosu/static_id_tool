@@ -50,10 +50,10 @@ public class StaticIdDao {
         return jdbcTemplate.query(sql, new StaticIdRowMapper(), componentId, "%" + suffix, rowsCount);
     }
 
-    public boolean idValueExists(String newIdValue) {
+    public boolean idValueExists(List<String> newIdValue) {
         try {
-            String sql = "select count(*) from staticid.created_id where id_value = ? and deleted_at is null";
-            Long found = jdbcTemplate.queryForObject(sql, Long.class, newIdValue);
+            String sql = "select count(*) from staticid.created_id where id_value in (?) and deleted_at is null";
+            Long found = jdbcTemplate.queryForObject(sql, Long.class, String.join(",", newIdValue));
             return found != null && found > 0;
         } catch (EmptyResultDataAccessException ex) {
             return false;

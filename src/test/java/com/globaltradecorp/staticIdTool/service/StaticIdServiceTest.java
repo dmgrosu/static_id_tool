@@ -4,11 +4,14 @@ import com.globaltradecorp.staticIdTool.dao.StaticIdDao;
 import com.globaltradecorp.staticIdTool.model.AppUser;
 import com.globaltradecorp.staticIdTool.model.ComponentType;
 import com.globaltradecorp.staticIdTool.model.StaticId;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -24,6 +27,11 @@ class StaticIdServiceTest {
     private AppUserService appUserServiceMock;
     @InjectMocks
     private StaticIdService staticIdService;
+
+    @AfterEach
+    void tearDown() {
+        reset(staticIdDaoMock, appUserServiceMock);
+    }
 
     @Test
     void test_getComponentList_daoCalledOnce() {
@@ -50,30 +58,30 @@ class StaticIdServiceTest {
     @Test
     void test_addNewIdValue_nullComponent_exceptionThrown() {
         // ACT & ASSERT
-        assertThrows(IllegalArgumentException.class, () -> staticIdService.addNewIdValue("someNewId", null));
+        assertThrows(IllegalArgumentException.class, () -> staticIdService.addNewIdValue(Collections.singletonList("someValue"), null));
     }
 
     @Test
     void test_addNewIdValue_existingValue_exceptionThrown() {
         // ARRANGE
-        when(staticIdDaoMock.idValueExists(anyString())).thenReturn(true);
+        when(staticIdDaoMock.idValueExists(anyList())).thenReturn(true);
         // ACT & ASSERT
-        assertThrows(IdValueExistsException.class, () -> staticIdService.addNewIdValue("someNewId", 1));
+        assertThrows(IdValueExistsException.class, () -> staticIdService.addNewIdValue(Collections.singletonList("someValue"), 1));
     }
 
     @Test
     void test_addNewIdValue_currentUserNotFound_exceptionThrown() {
         // ARRANGE
-        when(staticIdDaoMock.idValueExists(anyString())).thenReturn(false);
+        when(staticIdDaoMock.idValueExists(anyList())).thenReturn(false);
         when(appUserServiceMock.getCurrentUser()).thenReturn(null);
         // ACT & ASSERT
-        assertThrows(RuntimeException.class, () -> staticIdService.addNewIdValue("someNewId", 1));
+        assertThrows(RuntimeException.class, () -> staticIdService.addNewIdValue(Collections.singletonList("someValue"), 1));
     }
 
     @Test
     void test_addNewIdValue_daoCalledOnce() throws IdValueExistsException {
         // ARRANGE
-        when(staticIdDaoMock.idValueExists(anyString())).thenReturn(false);
+        when(staticIdDaoMock.idValueExists(anyList())).thenReturn(false);
         when(appUserServiceMock.getCurrentUser())
                 .thenReturn(AppUser.builder()
                         .id(1)
@@ -89,7 +97,7 @@ class StaticIdServiceTest {
                         .build());
         ArgumentCaptor<StaticId> captor = ArgumentCaptor.forClass(StaticId.class);
         // ACT
-        staticIdService.addNewIdValue("someNewValue", 1);
+        staticIdService.addNewIdValue(Collections.singletonList("someNewValue"), 1);
         // ASSERT
         verify(staticIdDaoMock, times(1)).saveStaticId(captor.capture());
         StaticId actualId = captor.getValue();

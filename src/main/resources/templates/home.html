@@ -247,7 +247,9 @@
     function sendAddRequest() {
         $('#okButton').prop('disabled', true);
         const data = {
-            idValue: $('#newIdValue').val(),
+            idValues: [
+                $('#newIdValue').val()
+            ],
             componentId: $('#componentType').val()
         };
         $.ajax({
