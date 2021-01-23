@@ -63,7 +63,7 @@ public class StaticIdDao {
     public void saveStaticId(StaticId staticId) {
         if (staticId.isNew()) {
             String sql = "insert into staticid.created_id(component_id, id_value, create_user_id) " +
-                    "values (?, ?, ?)";
+                    "values (?, ?, ?) on conflict (id_value) do update set deleted_at = null";
             jdbcTemplate.update(sql,
                     staticId.getComponentType().getId(),
                     staticId.getValue(),

@@ -79,7 +79,8 @@
         </table>
     </div>
     <div class="row">
-        <button class="btn btn-info" onclick="showAddModal()" id="buttonAddNew">Add new</button>
+        <button class="btn btn-info" onclick="showAddModal(false, 'show')" id="buttonAddNew">Add new</button>
+        <button class="btn btn-info" onclick="showAddModal(true, 'show')" id="buttonAddNewMulti">Add range</button>
         <button type="button" class="btn btn-default" id="buttonDelete" onclick="showDeleteConfirm()">Delete selected</button>
     </div>
 </div>
@@ -96,8 +97,35 @@
             <div class="modal-footer">
                 <button type="button"
                         class="btn btn-info btn-sm"
-                        onclick="sendAddRequest()"
+                        onclick="sendAddRequest(false)"
                         id="okButton"
+                >
+                    Ok
+                </button>
+                <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="newIdMultiModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4>Add new static ID values</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-inline">
+                    <input type="text" class="form-control" id="newIdFrom" onkeyup="setMultiValuesString()"/> -
+                    <input type="text" class="form-control" id="newIdTo" onkeyup="setMultiValuesString()"/>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <p id="valuesString" class="text-left"></p>
+                <button type="button"
+                        class="btn btn-info btn-sm"
+                        onclick="sendAddRequest(true)"
+                        id="okButtonMulti"
                 >
                     Ok
                 </button>
@@ -151,6 +179,65 @@
         }
     }
 
+    function setMultiValuesString() {
+        const values = getMultiValues();
+        let valuesString = 'no valid values';
+        if (values) {
+            const count = values.length;
+            let valuesJoined = values.join(", ");
+            if (count > 6) {
+                valuesJoined = values.slice(0, 3).join(", ").concat(' ... ', values.slice(-2).join(', '))
+            }
+            valuesString = count.toString().concat(' values: ', valuesJoined)
+        }
+        $('#valuesString').html(valuesString);
+    }
+
+    function getMultiValues() {
+        const fromStr = $('#newIdFrom').val();
+        const toStr = $('#newIdTo').val();
+        if (fromStr) {
+            const from = fromStr.match(/\d+/);
+            if (from) {
+                const to = toStr.match(/\d+/);
+                if (to) {
+                    const prefixFrom = fromStr.substring(0, from.index);
+                    const prefixTo = toStr.substring(0, to.index);
+                    if (prefixFrom !== prefixTo) {
+                        return null;
+                    }
+                    const fromLength = from.toString().length;
+                    const toLength = to.toString().length;
+                    if (fromLength !== toLength) {
+                        return null;
+                    }
+                    const suffixFrom = fromStr.substr(prefixFrom.length + fromLength);
+                    const suffixTo = toStr.substr(prefixTo.length + toLength);
+                    if (suffixFrom !== suffixTo) {
+                        return null;
+                    }
+                    const fromInt = Number(from);
+                    const toInt = Number(to);
+                    if (fromInt && toInt) {
+                        const count = toInt - fromInt;
+                        if (count > 0) {
+                            const values = [];
+                            for (let i = 0; i <= count; i++) {
+                                let currValue = (fromInt + i).toString();
+                                while (currValue.length < fromLength) {
+                                    currValue = '0' + currValue;
+                                }
+                                values.push(prefixFrom.concat(currValue, suffixFrom));
+                            }
+                            return values;
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
     function getUsername(user) {
         if (user.firstName) {
             return user.firstName + " " + user.lastName;
@@ -184,12 +271,21 @@
         });
     }
 
-    function showAddModal() {
-        if (!$('#componentType').val()) {
-            alert("Please select component type!");
-            return;
+    function showAddModal(multi, action) {
+        if (action === 'show') {
+            if (!$('#componentType').val()) {
+                alert("Please select component type!");
+                return;
+            }
         }
-        $('#newIdModal').modal('show');
+        if (multi) {
+            $('#newIdFrom').val('');
+            $('#newIdTo').val('');
+            $('#valuesString').html('');
+            $('#newIdMultiModal').modal(action);
+        } else {
+            $('#newIdModal').modal(action);
+        }
     }
 
     function showDeleteConfirm() {
@@ -244,14 +340,16 @@
         });
     }
 
-    function sendAddRequest() {
-        $('#okButton').prop('disabled', true);
+    function sendAddRequest(multi) {
+        const values = multi ? getMultiValues() : [$('#newIdValue').val()];
+        if (values.length === 0) {
+            alert('No values to add');
+        }
         const data = {
-            idValues: [
-                $('#newIdValue').val()
-            ],
+            idValues: values,
             componentId: $('#componentType').val()
         };
+        setOkButtonDisabled(true);
         $.ajax({
             type: 'POST',
             contentType: "application/json",
@@ -259,14 +357,14 @@
             data: JSON.stringify(data),
             dataType: "JSON",
             success: function () {
-                $('#newIdModal').modal('hide');
-                $('#okButton').prop('disabled', false);
+                showAddModal(multi, 'hide');
+                setOkButtonDisabled(false);
                 showExisting();
             },
             error: function (resp) {
                 switch (resp.status) {
                     case 200:
-                        $('#newIdModal').modal('hide');
+                        showAddModal(multi, 'hide');
                         showExisting();
                         break;
                     case 400:
@@ -275,9 +373,14 @@
                     default:
                         alert('Internal server error');
                 }
-                $('#okButton').prop('disabled', false);
+                setOkButtonDisabled(false);
             }
         });
+    }
+
+    function setOkButtonDisabled(active) {
+        $('#okButton').prop('disabled', active);
+        $('#okButtonMulti').prop('disabled', active);
     }
 
     $("#newIdValue").keyup(function (event) {
