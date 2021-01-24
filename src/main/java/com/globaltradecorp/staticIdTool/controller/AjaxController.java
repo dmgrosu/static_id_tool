@@ -41,7 +41,7 @@ public class AjaxController {
     @PostMapping("/addNew")
     public ResponseEntity<String> addNewIdValue(@RequestBody StaticIdDto staticIdDto) {
         try {
-            staticIdService.addNewIdValue(staticIdDto.getIdValue(), staticIdDto.getComponentId());
+            staticIdService.addNewIdValue(staticIdDto.getIdValues(), staticIdDto.getComponentId());
             return ResponseEntity.ok().build();
         } catch (IdValueExistsException ex) {
             logger.debug(ex.getMessage(), ex);

@@ -110,7 +110,7 @@ class AjaxControllerTest {
     void test_addNewIdValue_validId_serviceMethodCalled() throws Exception {
         // ARRANGE
         String jsonString = objectMapper.writeValueAsString(StaticIdDto.builder()
-                .idValue("someIdValue")
+                .idValues(Collections.singletonList("someIdValue"))
                 .componentId(1)
                 .build());
         // ACT
@@ -119,7 +119,8 @@ class AjaxControllerTest {
                 .content(jsonString))
                 .andExpect(status().isOk());
         // ASSERT
-        verify(staticIdServiceMock, times(1)).addNewIdValue(eq("someIdValue"), eq(1));
+        verify(staticIdServiceMock, times(1))
+                .addNewIdValue(eq(Collections.singletonList("someIdValue")), eq(1));
     }
 
     @Test

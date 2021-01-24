@@ -34,18 +34,25 @@ public class StaticIdService {
         return staticIdDao.getStaticIdList(componentId, suffix, rowsCount);
     }
 
-    public void addNewIdValue(String newIdValue, Integer componentId) throws IdValueExistsException {
+    public void addNewIdValue(List<String> newIdValues, Integer componentId) throws IdValueExistsException {
 
-        Assert.notNull(newIdValue, "New ID value could not be null");
+        Assert.notNull(newIdValues, "New ID values list could not be null");
         Assert.notNull(componentId, "Component ID could not be null");
+        Assert.notEmpty(newIdValues, "New ID values list could not be empty");
 
-        if (staticIdDao.idValueExists(newIdValue)) {
-            throw new IdValueExistsException(String.format("ID value already exists: [%s]", newIdValue));
+        if (staticIdDao.idValueExists(newIdValues)) {
+            throw new IdValueExistsException(String.format("ID value already exists: [%s]", newIdValues));
         }
 
         AppUser currentUser = getCurrentUser();
         ComponentType componentType = staticIdDao.getComponentTypeById(componentId);
 
+        for (String newIdValue : newIdValues) {
+            addNewId(currentUser, componentType, newIdValue);
+        }
+    }
+
+    private void addNewId(AppUser currentUser, ComponentType componentType, String newIdValue) {
         StaticId newStaticId = StaticId.builder()
                 .value(newIdValue)
                 .createdBy(currentUser)
