@@ -92,7 +92,13 @@
                 <h4 id="modalHeader">Add new static ID value</h4>
             </div>
             <div class="modal-body">
-                <input type="text" class="form-control" id="newIdValue"/>
+                <div class="form-group" id="newValueGroup">
+                    <input type="text"
+                           class="form-control"
+                           id="newIdValue"
+                           onkeyup="$('#newValueGroup').removeClass('has-error')"
+                    />
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button"
@@ -115,9 +121,20 @@
                 <h4>Add new static ID values</h4>
             </div>
             <div class="modal-body">
+
                 <div class="form-inline">
-                    <input type="text" class="form-control" id="newIdFrom" onkeyup="setMultiValuesString()"/> -
-                    <input type="text" class="form-control" id="newIdTo" onkeyup="setMultiValuesString()"/>
+                    <div class="form-group" id="newValuesGroup">
+                        <input type="text"
+                               class="form-control"
+                               id="newIdFrom"
+                               onkeyup="setMultiValuesString()"
+                        /> -
+                        <input type="text"
+                               class="form-control"
+                               id="newIdTo"
+                               onkeyup="setMultiValuesString()"
+                        />
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -189,6 +206,7 @@
                 valuesJoined = values.slice(0, 3).join(", ").concat(' ... ', values.slice(-2).join(', '))
             }
             valuesString = count.toString().concat(' values: ', valuesJoined)
+            $('#newValuesGroup').removeClass('has-error');
         }
         $('#valuesString').html(valuesString);
     }
@@ -342,8 +360,13 @@
 
     function sendAddRequest(multi) {
         const values = multi ? getMultiValues() : [$('#newIdValue').val()];
-        if (values.length === 0) {
-            alert('No values to add');
+        if (!values || values.length === 0 || values[0].length === 0) {
+            if (multi) {
+                $('#newValuesGroup').addClass("has-error");
+            } else {
+                $('#newValueGroup').addClass("has-error");
+            }
+            return;
         }
         const data = {
             idValues: values,
