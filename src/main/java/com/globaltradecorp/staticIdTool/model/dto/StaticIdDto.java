@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
 
+import java.util.List;
+
 /**
  * @author Dmitri Grosu (dmitri.grosu@codefactorygroup.com), 1/8/21
  */
@@ -12,5 +14,5 @@ import lombok.Value;
 @Builder
 public class StaticIdDto {
     Integer componentId;
-    String idValue;
+    List<String> idValues;
 }
