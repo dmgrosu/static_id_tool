@@ -2,6 +2,7 @@ package com.globaltradecorp.staticIdTool.service;
 
 import com.globaltradecorp.staticIdTool.dao.UserDao;
 import com.globaltradecorp.staticIdTool.model.AppUser;
+import com.globaltradecorp.staticIdTool.model.Role;
 import lombok.AllArgsConstructor;
 import org.springframework.lang.Nullable;
 import org.springframework.security.core.Authentication;
@@ -22,6 +23,7 @@ public class AppUserService {
     private final UserDao userDao;
 
     public void registerNewUser(AppUser appUser) {
+        appUser.addRole(Role.USER);
         userDao.saveUser(appUser);
     }
 
