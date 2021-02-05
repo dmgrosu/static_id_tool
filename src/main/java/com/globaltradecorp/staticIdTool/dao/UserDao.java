@@ -1,6 +1,7 @@
 package com.globaltradecorp.staticIdTool.dao;
 
 import com.globaltradecorp.staticIdTool.model.AppUser;
+import com.globaltradecorp.staticIdTool.model.Role;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Component;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * @author Dmitri Grosu (dmitri.grosu@codefactorygroup.com), 1/7/21
@@ -99,6 +101,20 @@ public class UserDao {
         }
     }
 
+    public boolean rolesExists(List<Role> roles) {
+        try {
+            String rolesJoined = roles.stream()
+                    .map(Role::getName)
+                    .collect(Collectors.joining(","));
+            String sql = "select exists(select 1 from staticid.app_role where name in (?) and deleted_at is null)";
+            Boolean queryResult = jdbcTemplate.queryForObject(sql, Boolean.class, rolesJoined);
+            return queryResult != null && queryResult;
+        } catch (Exception ex) {
+            log.error(ex.getMessage(), ex);
+            throw ex;
+        }
+    }
+
     public boolean usernameExists(String username) {
         try {
             String sql = "select exists(select 1 from staticid.app_user where username=? and deleted_at is null)";
@@ -158,6 +174,19 @@ public class UserDao {
         try {
             String sql = "update staticid.app_user set deleted_at=? where id=?";
             jdbcTemplate.update(sql, userTime, userId);
+        } catch (Exception ex) {
+            log.error(ex.getMessage());
+            throw ex;
+        }
+    }
+
+    public void saveRoleForUsername(String username, Role role) {
+        try {
+            String sql = "insert into staticid.app_user_role(user_id, role_id) values (" +
+                    "(select id from staticid.app_user where username = ?)," +
+                    "(select id from staticid.app_role where name = ?)" +
+                    ")";
+            jdbcTemplate.update(sql, username, role.getName());
         } catch (Exception ex) {
             log.error(ex.getMessage());
             throw ex;
