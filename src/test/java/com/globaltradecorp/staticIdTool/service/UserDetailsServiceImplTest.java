@@ -2,6 +2,7 @@ package com.globaltradecorp.staticIdTool.service;
 
 import com.globaltradecorp.staticIdTool.dao.UserDao;
 import com.globaltradecorp.staticIdTool.model.AppUser;
+import com.globaltradecorp.staticIdTool.model.Role;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -37,7 +38,7 @@ class UserDetailsServiceImplTest {
                         .firstName("John")
                         .lastName("Doe")
                         .approvedAt(OffsetDateTime.now())
-                        .roles(Collections.singletonList("USER"))
+                        .roles(Collections.singletonList(Role.USER))
                         .build())
                 );
 

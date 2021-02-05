@@ -1,6 +1,7 @@
 package com.globaltradecorp.staticIdTool.dao;
 
 import com.globaltradecorp.staticIdTool.model.AppUser;
+import com.globaltradecorp.staticIdTool.model.Role;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -8,6 +9,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.time.OffsetDateTime;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
@@ -162,5 +165,29 @@ class UserDaoTest {
         userDao.getAll();
         // ASSERT
         verify(jdbcTemplateMock, times(1)).query(eq(expectedSql), isA(AppUserRowMapper.class));
+    }
+
+    @Test
+    void test_rolesExists_checkJdbcMethodParams() {
+        // ARRANGE
+        String expectedSql = "select exists(select 1 from staticid.app_role where name in (?) and deleted_at is null)";
+        List<Role> someRoles = Arrays.asList(Role.USER, Role.ADMIN);
+        // ACT
+        userDao.rolesExists(someRoles);
+        // ASSERT
+        verify(jdbcTemplateMock, times(1)).queryForObject(eq(expectedSql), eq(Boolean.class), eq("USER,ADMIN"));
+    }
+
+    @Test
+    void test_saveRoleForUsername_daoCalled() {
+        // ARRANGE
+        String expectedSql = "insert into staticid.app_user_role(user_id, role_id) values (" +
+                "(select id from staticid.app_user where username = ?)," +
+                "(select id from staticid.app_role where name = ?)" +
+                ")";
+        // ACT
+        userDao.saveRoleForUsername("someUser", Role.USER);
+        // ASSERT
+        verify(jdbcTemplateMock, times(1)).update(eq(expectedSql), eq("someUser"), eq("USER"));
     }
 }

@@ -9,6 +9,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author Dmitri Grosu (dmitri.grosu@codefactorygroup.com), 1/7/21
@@ -25,7 +26,7 @@ public class AppUser {
     @Nullable
     OffsetDateTime approvedAt;
     @Builder.Default
-    List<String> roles = new ArrayList<>();
+    List<Role> roles = new ArrayList<>();
 
     public boolean isNew() {
         return id == null;
@@ -36,10 +37,21 @@ public class AppUser {
     }
 
     public String getRolesString() {
-        return roles.isEmpty() ? "" : String.join(",", roles);
+        if (roles.isEmpty()) {
+            return "";
+        }
+        return roles.stream()
+                .map(Role::getName)
+                .collect(Collectors.joining(","));
     }
 
     public String getApprovedFormatted() {
         return isApproved() ? approvedAt.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM)) : "<not approved>";
+    }
+
+    public void addRole(Role role) {
+        if (!roles.contains(role)) {
+            roles.add(role);
+        }
     }
 }

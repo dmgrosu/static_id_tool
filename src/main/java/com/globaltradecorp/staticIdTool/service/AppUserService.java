@@ -2,11 +2,13 @@ package com.globaltradecorp.staticIdTool.service;
 
 import com.globaltradecorp.staticIdTool.dao.UserDao;
 import com.globaltradecorp.staticIdTool.model.AppUser;
+import com.globaltradecorp.staticIdTool.model.Role;
 import lombok.AllArgsConstructor;
 import org.springframework.lang.Nullable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -21,8 +23,16 @@ public class AppUserService {
 
     private final UserDao userDao;
 
+    @Transactional
     public void registerNewUser(AppUser appUser) {
-        userDao.saveUser(appUser);
+        appUser.addRole(Role.USER);
+        if (userDao.rolesExists(appUser.getRoles())) {
+            userDao.saveUser(appUser);
+            appUser.getRoles().forEach(role -> userDao.saveRoleForUsername(appUser.getUsername(), role));
+        } else {
+            String msg = String.format("One or more roles does not exists: [%s]", appUser.getRoles());
+            throw new IllegalArgumentException(msg);
+        }
     }
 
     public boolean usernameExists(String username) {

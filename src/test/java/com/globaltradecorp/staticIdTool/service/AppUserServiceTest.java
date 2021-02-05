@@ -2,6 +2,7 @@ package com.globaltradecorp.staticIdTool.service;
 
 import com.globaltradecorp.staticIdTool.dao.UserDao;
 import com.globaltradecorp.staticIdTool.model.AppUser;
+import com.globaltradecorp.staticIdTool.model.Role;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -11,6 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.util.Collections;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -36,13 +38,18 @@ class AppUserServiceTest {
 
     @Test
     void registerNewUser_daoCalledOnce() {
+        // ARRANGE
+        when(userDaoMock.rolesExists(any())).thenReturn(true);
         // ACT
         appUserService.registerNewUser(AppUser.builder()
                 .firstName("John")
                 .lastName("Doe")
+                .username("jdoe")
+                .roles(Collections.singletonList(Role.USER))
                 .build());
         // ASSERT
         verify(userDaoMock, times(1)).saveUser(any(AppUser.class));
+        verify(userDaoMock, times(1)).saveRoleForUsername(eq("jdoe"), eq(Role.USER));
     }
 
     @Test
